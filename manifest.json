@@ -1,0 +1,17 @@
+{
+  "name": "Invoice Koperasi Aguna Sakti",
+  "short_name": "StockPro",
+  "description": "Aplikasi Manajemen Stok Koperasi Aguna Sakti",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#0ea5e9",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

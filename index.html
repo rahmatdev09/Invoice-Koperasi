@@ -1,0 +1,643 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StockPro - Aguna Sakti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <link rel="manifest" href="manifest.json" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap");
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .nav-active-desktop {
+        color: #4f46e5 !important;
+        background: #f5f3ff !important;
+        border-right: 4px solid #4f46e5;
+      }
+      .nav-active-mobile {
+        color: #4f46e5 !important;
+      }
+      @media (max-width: 640px) {
+        .desktop-sidebar {
+          display: none !important;
+        }
+      }
+      .modal-animate {
+        animation: fadeIn 0.2s ease-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body class="bg-[#fcfcfd] text-slate-900">
+    <div class="flex h-screen overflow-hidden">
+      <aside
+        class="desktop-sidebar w-72 bg-white border-r border-slate-100 p-6 flex flex-col"
+      >
+        <div class="flex items-center gap-3 mb-10 px-2">
+          <div
+            class="w-12 h-12 bg-sky-100 rounded-2xl shadow-sm flex items-center justify-center text-white border border-white"
+          >
+            <img class="rounded-2xl" src="logo.png" alt="" />
+          </div>
+          <div>
+            <h1 class="text-lg font-bold leading-none text-slate-800">
+              Invoice Koperasi
+            </h1>
+            <p
+              class="text-[10px] text-sky-500 font-bold uppercase tracking-widest"
+            >
+              Aguna Sakti
+            </p>
+          </div>
+        </div>
+        <nav class="space-y-1 flex-1">
+          <button
+            onclick="showSection('dashboard')"
+            id="btn-dash-d"
+            class="nav-btn-d w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 font-semibold transition nav-active-desktop"
+          >
+            <i class="fas fa-home-alt w-5"></i> Dashboard
+          </button>
+          <button
+            onclick="showSection('master')"
+            id="btn-master-d"
+            class="nav-btn-d w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 font-semibold transition"
+          >
+            <i class="fas fa-box-open w-5"></i> Inventory
+          </button>
+          <button
+            onclick="showSection('cetak')"
+            id="btn-cetak-d"
+            class="nav-btn-d w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 font-semibold transition"
+          >
+            <i class="fas fa-receipt w-5"></i> Riwayat Nota
+          </button>
+        </nav>
+        <div class="mt-auto pt-6 border-t border-slate-50">
+          <button
+            id="installBtn"
+            class="hidden w-full p-4 bg-sky-50 text-sky-600 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 hover:bg-sky-100 transition"
+          >
+            <i class="fas fa-cloud-arrow-down"></i> Install Aplikasi
+          </button>
+        </div>
+      </aside>
+
+      <main class="flex-1 overflow-y-auto pb-24 sm:pb-0">
+        <div class="p-6 sm:p-10 max-w-5xl mx-auto">
+          <section id="section-dashboard" class="content-section space-y-6">
+            <header>
+              <h2 class="text-2xl font-bold text-slate-800 tracking-tight">
+                Ringkasan Produk
+              </h2>
+              <p class="text-slate-400 text-sm italic">
+                Koperasi Konsumen Aguna Sakti Sejahterah
+              </p>
+            </header>
+            <div
+              class="bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm flex items-center gap-6"
+            >
+              <div
+                class="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center text-2xl"
+              >
+                <i class="fas fa-boxes-stacked"></i>
+              </div>
+              <div>
+                <p
+                  class="text-slate-400 text-xs font-bold uppercase tracking-widest"
+                >
+                  Total Barang
+                </p>
+                <h3 id="dash-total-barang" class="text-4xl font-bold">0</h3>
+              </div>
+            </div>
+          </section>
+
+          <section id="section-master" class="content-section hidden space-y-6">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-bold">Data Barang</h2>
+              <button
+                onclick="openModalBaru()"
+                class="bg-indigo-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-indigo-100"
+              >
+                + Tambah Barang
+              </button>
+            </div>
+            <div
+              class="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm"
+            >
+              <table class="w-full text-left">
+                <thead
+                  class="text-[10px] uppercase font-bold text-slate-400 bg-slate-50/50"
+                >
+                  <tr>
+                    <th class="px-6 py-4">ID</th>
+                    <th class="px-6 py-4">Nama Produk</th>
+                    <th class="px-6 py-4">Harga</th>
+                    <th class="px-6 py-4 text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody
+                  id="tableBarangBody"
+                  class="divide-y divide-slate-50"
+                ></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section id="section-cetak" class="content-section hidden space-y-6">
+            <div class="flex justify-between items-center">
+              <h2 class="text-2xl font-bold">Riwayat Transaksi</h2>
+              <button
+                onclick="openModalNota()"
+                class="bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-emerald-100"
+              >
+                Buat Nota Baru
+              </button>
+            </div>
+            <div
+              id="tableNotaBody"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            ></div>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <nav
+      class="fixed bottom-0 left-0 right-0 h-20 bg-white border-t border-slate-100 flex sm:hidden justify-around items-center px-4 z-40"
+    >
+      <button
+        onclick="showSection('dashboard')"
+        id="btn-dash-m"
+        class="nav-btn-m flex flex-col items-center gap-1 nav-active-mobile"
+      >
+        <i class="fas fa-home-alt text-xl"></i
+        ><span class="text-[10px] font-bold">Home</span>
+      </button>
+      <button
+        onclick="showSection('master')"
+        id="btn-master-m"
+        class="nav-btn-m flex flex-col items-center gap-1 text-slate-400"
+      >
+        <i class="fas fa-box-open text-xl"></i
+        ><span class="text-[10px] font-bold">Items</span>
+      </button>
+      <button
+        onclick="showSection('cetak')"
+        id="btn-cetak-m"
+        class="nav-btn-m flex flex-col items-center gap-1 text-slate-400"
+      >
+        <i class="fas fa-receipt text-xl"></i
+        ><span class="text-[10px] font-bold">Nota</span>
+      </button>
+    </nav>
+
+    <div
+      id="modalBarang"
+      class="fixed inset-0 bg-slate-900/40 hidden z-[60] backdrop-blur-sm items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-[2rem] w-full max-w-md p-8 modal-animate">
+        <h3 id="labelModalBarang" class="text-xl font-bold mb-6">
+          Tambah Barang
+        </h3>
+        <input type="hidden" id="editId" />
+        <input
+          type="text"
+          id="inNamaBarang"
+          placeholder="Nama Produk"
+          class="w-full p-4 bg-slate-50 rounded-2xl mb-4 outline-none border border-slate-100"
+        />
+        <input
+          type="text"
+          id="inHargaBarang"
+          placeholder="Rp 0"
+          class="w-full p-4 bg-slate-50 rounded-2xl mb-6 outline-none border border-slate-100 font-bold text-indigo-600"
+          oninput="formatRupiah(this)"
+        />
+        <div class="flex gap-3">
+          <button
+            onclick="closeModal('modalBarang')"
+            class="flex-1 py-4 font-bold text-slate-400"
+          >
+            Batal
+          </button>
+          <button
+            onclick="saveBarang()"
+            class="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-bold"
+          >
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="modalNota"
+      class="fixed inset-0 bg-slate-900/40 hidden z-[60] backdrop-blur-sm items-center justify-center p-4"
+    >
+      <div
+        class="bg-white rounded-[2rem] w-full max-w-2xl p-8 max-h-[90vh] overflow-y-auto modal-animate"
+      >
+        <h3 class="text-xl font-bold mb-6">Transaksi Baru</h3>
+        <input
+          type="text"
+          id="inNamaNota"
+          placeholder="Nama Pelanggan"
+          class="w-full p-4 bg-slate-50 rounded-2xl mb-6 outline-none border border-slate-100"
+        />
+
+        <div
+          class="p-6 border-2 border-dashed border-slate-100 rounded-3xl mb-6 space-y-4"
+        >
+          <div>
+            <label class="text-[10px] font-bold text-slate-400 uppercase ml-1"
+              >Pilih Produk</label
+            >
+            <select
+              id="selectBarang"
+              class="w-full p-4 bg-slate-50 rounded-2xl outline-none border border-slate-100 mt-1"
+            ></select>
+          </div>
+
+          <div class="flex gap-3 items-end">
+            <div class="flex-1">
+              <label class="text-[10px] font-bold text-slate-400 uppercase ml-1"
+                >Jumlah (Qty)</label
+              >
+              <input
+                type="number"
+                id="inQty"
+                value="1"
+                class="w-full p-4 bg-slate-50 rounded-2xl outline-none border border-slate-100 mt-1"
+              />
+            </div>
+            <button
+              onclick="addItemToNota()"
+              class="bg-indigo-600 text-white h-[58px] px-8 rounded-2xl font-bold hover:bg-indigo-700 transition"
+            >
+              Tambah ke List
+            </button>
+          </div>
+
+          <table class="w-full text-sm mt-4">
+            <tbody id="notaItemsBody"></tbody>
+          </table>
+          <div
+            class="text-right font-bold text-2xl mt-4 pt-4 border-t border-slate-100 text-indigo-600"
+          >
+            Total: <span id="notaTotalLabel">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            onclick="closeModal('modalNota')"
+            class="flex-1 py-4 font-bold text-slate-400"
+          >
+            Tutup
+          </button>
+          <button
+            onclick="saveNota()"
+            class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-bold shadow-lg shadow-emerald-100"
+          >
+            Selesaikan & Print
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="modalConfirm"
+      class="fixed inset-0 bg-slate-900/60 hidden z-[100] backdrop-blur-md flex items-center justify-center p-6"
+    >
+      <div
+        class="bg-white rounded-[2rem] w-full max-w-xs p-8 text-center modal-animate"
+      >
+        <div
+          class="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl"
+        >
+          <i class="fas fa-trash-can"></i>
+        </div>
+        <h3 class="text-xl font-bold">Hapus Data?</h3>
+        <div class="mt-6 flex flex-col gap-2">
+          <button
+            id="confirmYes"
+            class="w-full py-3 bg-red-500 text-white font-bold rounded-xl"
+          >
+            Hapus
+          </button>
+          <button
+            onclick="closeModal('modalConfirm')"
+            class="w-full py-3 bg-slate-100 text-slate-500 font-bold rounded-xl"
+          >
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="toastSuccess"
+      class="fixed bottom-24 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-2xl z-[100] hidden items-center gap-3"
+    >
+      <i class="fas fa-check-circle text-green-400"></i
+      ><span class="font-bold text-sm">Berhasil Disimpan!</span>
+    </div>
+
+    <script>
+      let db;
+      const req = indexedDB.open("AgunaSaktiV4DB", 1);
+      req.onupgradeneeded = (e) => {
+        db = e.target.result;
+        db.createObjectStore("barang", { keyPath: "id", autoIncrement: true });
+        db.createObjectStore("nota", { keyPath: "id", autoIncrement: true });
+      };
+      req.onsuccess = (e) => {
+        db = e.target.result;
+        refreshAll();
+      };
+
+      let state = { barang: [], nota: [], currentItems: [] };
+
+      function formatRupiah(el) {
+        let val = el.value.replace(/[^,\d]/g, "").toString();
+        let split = val.split(",");
+        let sisa = split[0].length % 3;
+        let rupiah = split[0].substr(0, sisa);
+        let ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+        if (ribuan) {
+          rupiah += (sisa ? "." : "") + ribuan.join(".");
+        }
+        el.value = rupiah ? "Rp " + rupiah : "";
+      }
+
+      function getRawNumber(str) {
+        return parseInt(str.replace(/[^0-9]/g, "")) || 0;
+      }
+
+      function showSection(id) {
+        document
+          .querySelectorAll(".content-section")
+          .forEach((s) => s.classList.add("hidden"));
+        document.getElementById("section-" + id).classList.remove("hidden");
+        document
+          .querySelectorAll(".nav-btn-d")
+          .forEach((btn) => btn.classList.remove("nav-active-desktop"));
+        document.querySelectorAll(".nav-btn-m").forEach((btn) => {
+          btn.classList.remove("nav-active-mobile");
+          btn.classList.add("text-slate-400");
+        });
+        const map = { dashboard: "dash", master: "master", cetak: "cetak" };
+        document
+          .getElementById(`btn-${map[id]}-d`)
+          .classList.add("nav-active-desktop");
+        const mBtn = document.getElementById(`btn-${map[id]}-m`);
+        mBtn.classList.add("nav-active-mobile");
+        mBtn.classList.remove("text-slate-400");
+      }
+
+      function refreshAll() {
+        const tx = db.transaction(["barang", "nota"], "readonly");
+        tx.objectStore("barang").getAll().onsuccess = (e) => {
+          state.barang = e.target.result;
+          renderBarang();
+          document.getElementById("dash-total-barang").innerText =
+            state.barang.length;
+        };
+        tx.objectStore("nota").getAll().onsuccess = (e) => {
+          state.nota = e.target.result;
+          renderNota();
+        };
+      }
+
+      function renderBarang() {
+        const body = document.getElementById("tableBarangBody");
+        body.innerHTML =
+          state.barang
+            .map(
+              (b) => `
+                <tr class="hover:bg-slate-50/50"><td class="px-6 py-4 text-xs font-bold text-slate-300">#${b.id}</td><td class="px-6 py-4 font-semibold">${b.nama}</td><td class="px-6 py-4 font-bold text-indigo-600">Rp ${b.harga.toLocaleString("id-ID")}</td>
+                <td class="px-6 py-4 text-right"><button onclick="editBarang(${b.id})" class="text-amber-500 mr-2"><i class="fas fa-edit"></i></button><button onclick="askDelete(${b.id}, 'barang')" class="text-red-400"><i class="fas fa-trash"></i></button></td></tr>
+            `,
+            )
+            .join("") ||
+          '<tr><td colspan="4" class="p-10 text-center text-slate-300">Inventory kosong</td></tr>';
+      }
+
+      // FUNGSI KHUSUS BUKA MODAL BARU (RESET ID)
+      function openModalBaru() {
+        document.getElementById("editId").value = ""; // Kunci utama: Reset ID
+        document.getElementById("labelModalBarang").innerText = "Tambah Barang";
+        document.getElementById("inNamaBarang").value = "";
+        document.getElementById("inHargaBarang").value = "";
+        openModal("modalBarang");
+      }
+
+      function editBarang(id) {
+        const b = state.barang.find((x) => x.id === id);
+        document.getElementById("editId").value = b.id;
+        document.getElementById("labelModalBarang").innerText = "Edit Barang";
+        document.getElementById("inNamaBarang").value = b.nama;
+        document.getElementById("inHargaBarang").value =
+          "Rp " + b.harga.toLocaleString("id-ID");
+        openModal("modalBarang");
+      }
+
+      function saveBarang() {
+        const id = document.getElementById("editId").value;
+        const nama = document.getElementById("inNamaBarang").value;
+        const harga = getRawNumber(
+          document.getElementById("inHargaBarang").value,
+        );
+        if (!nama || !harga) return;
+        const tx = db.transaction("barang", "readwrite");
+        const store = tx.objectStore("barang");
+        id
+          ? store.put({ id: parseInt(id), nama, harga })
+          : store.add({ nama, harga });
+        tx.oncomplete = () => {
+          closeModal("modalBarang");
+          showToast();
+          refreshAll();
+        };
+      }
+
+      function openModalNota() {
+        state.currentItems = [];
+        document.getElementById("inNamaNota").value = "";
+        document.getElementById("inQty").value = 1;
+        renderNotaItems();
+        document.getElementById("selectBarang").innerHTML = state.barang
+          .map(
+            (b) =>
+              `<option value="${b.id}">${b.nama} - Rp ${b.harga.toLocaleString("id-ID")}</option>`,
+          )
+          .join("");
+        openModal("modalNota");
+      }
+
+      function addItemToNota() {
+        const bid = parseInt(document.getElementById("selectBarang").value);
+        const qty = parseInt(document.getElementById("inQty").value);
+        const b = state.barang.find((x) => x.id === bid);
+        if (b) state.currentItems.push({ ...b, qty, subtotal: b.harga * qty });
+        renderNotaItems();
+      }
+
+      function renderNotaItems() {
+        let total = 0;
+        document.getElementById("notaItemsBody").innerHTML = state.currentItems
+          .map((it, idx) => {
+            total += it.subtotal;
+            return `<tr class="border-b border-slate-50"><td class="py-2"><b>${it.nama}</b><br><span class="text-xs text-slate-400">${it.qty} x ${it.harga.toLocaleString()}</span></td><td class="text-right font-bold">Rp ${it.subtotal.toLocaleString()}</td></tr>`;
+          })
+          .join("");
+        document.getElementById("notaTotalLabel").innerText =
+          "Rp " + total.toLocaleString("id-ID");
+      }
+
+      function saveNota() {
+        const nama = document.getElementById("inNamaNota").value || "Pelanggan";
+        if (state.currentItems.length === 0) return;
+        const tx = db.transaction("nota", "readwrite");
+        tx.objectStore("nota").add({
+          namaPelanggan: nama,
+          total: state.currentItems.reduce((a, b) => a + b.subtotal, 0),
+          items: state.currentItems,
+          tanggal: new Date().toLocaleString("id-ID"),
+        });
+        tx.oncomplete = () => {
+          closeModal("modalNota");
+          showToast();
+          refreshAll();
+        };
+      }
+
+      function renderNota() {
+        const body = document.getElementById("tableNotaBody");
+        body.innerHTML =
+          state.nota
+            .map(
+              (n) => `
+                <div class="bg-white p-6 rounded-3xl border border-slate-100 flex justify-between items-center shadow-sm">
+                    <div><p class="text-[10px] font-bold text-slate-300 uppercase">${n.tanggal}</p><h4 class="font-bold">${n.namaPelanggan}</h4><p class="text-indigo-600 font-bold">Rp ${n.total.toLocaleString("id-ID")}</p></div>
+                    <div class="flex gap-2"><button onclick="printStruk(${n.id})" class="p-3 bg-slate-50 rounded-xl"><i class="fas fa-print"></i></button><button onclick="askDelete(${n.id}, 'nota')" class="p-3 bg-red-50 text-red-400 rounded-xl"><i class="fas fa-trash"></i></button></div>
+                </div>
+            `,
+            )
+            .join("") ||
+          '<div class="col-span-full p-10 text-center text-slate-300">Belum ada nota</div>';
+      }
+
+      function printStruk(id) {
+        const n = state.nota.find((x) => x.id === id);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({
+          unit: "mm",
+          format: [80, 150 + n.items.length * 10],
+        });
+        doc.setFont("courier", "bold");
+        doc.setFontSize(10);
+        doc.text("KOPERASI KONSUMEN", 40, 10, { align: "center" });
+        doc.text("AGUNA SAKTI SEJAHTERAH", 40, 14, { align: "center" });
+        doc.setFont("courier", "normal");
+        doc.setFontSize(8);
+        doc.text("------------------------------------------", 40, 18, {
+          align: "center",
+        });
+        doc.text(`TGL: ${n.tanggal}`, 5, 22);
+        doc.text(`PLG : ${n.namaPelanggan.toUpperCase()}`, 5, 26);
+        doc.text("------------------------------------------", 40, 30, {
+          align: "center",
+        });
+        let y = 34;
+        n.items.forEach((it) => {
+          doc.text(`${it.nama.toUpperCase()}`, 5, y);
+          doc.text(`${it.qty} x ${it.harga.toLocaleString()}`, 5, y + 4);
+          doc.text(`${it.subtotal.toLocaleString()}`, 75, y + 4, {
+            align: "right",
+          });
+          y += 10;
+        });
+        doc.text("------------------------------------------", 40, y, {
+          align: "center",
+        });
+        doc.setFont("courier", "bold");
+        doc.text("TOTAL", 5, y + 5);
+        doc.text(`Rp ${n.total.toLocaleString()}`, 75, y + 5, {
+          align: "right",
+        });
+        doc.setFontSize(7);
+        doc.text("TERIMA KASIH", 40, y + 12, { align: "center" });
+        doc.save(`Struk_${n.id}.pdf`);
+      }
+
+      let deleteTarget = null;
+      function askDelete(id, type) {
+        deleteTarget = { id, type };
+        document.getElementById("modalConfirm").style.display = "flex";
+      }
+      document.getElementById("confirmYes").onclick = () => {
+        const tx = db.transaction(deleteTarget.type, "readwrite");
+        tx.objectStore(deleteTarget.type).delete(deleteTarget.id);
+        tx.oncomplete = () => {
+          closeModal("modalConfirm");
+          refreshAll();
+        };
+      };
+
+      function showToast() {
+        const t = document.getElementById("toastSuccess");
+        t.style.display = "flex";
+        setTimeout(() => (t.style.display = "none"), 2000);
+      }
+      function openModal(id) {
+        document.getElementById(id).style.display = "flex";
+      }
+      function closeModal(id) {
+        document.getElementById(id).style.display = "none";
+      }
+
+      let deferredPrompt;
+      const installBtn = document.getElementById("installBtn");
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        // Simpan event agar bisa dipicu nanti
+        e.preventDefault();
+        deferredPrompt = e;
+        // Munculkan tombol install
+        installBtn.classList.remove("hidden");
+      });
+
+      installBtn.addEventListener("click", async () => {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          const { outcome } = await deferredPrompt.userChoice;
+          if (outcome === "accepted") {
+            installBtn.classList.add("hidden");
+          }
+          deferredPrompt = null;
+        }
+      });
+    </script>
+  </body>
+</html>
